@@ -16,7 +16,9 @@ import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Log;
 import android.view.Menu;
+import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
@@ -30,6 +32,9 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		TextView text = (TextView)findViewById(R.id.textView1);
+		text.setText("test");
+		searchWord("love");
 	}
 
 	@Override
@@ -40,7 +45,7 @@ public class MainActivity extends Activity {
 	}
 
 	
-	private void clickAd(String word){
+	private void searchWord(String word){
 		new GetRequest(getWordMatch(word)) {
 			@Override
 			protected void onPostExecute(JSONObject json) {
@@ -51,7 +56,7 @@ public class MainActivity extends Activity {
 	
 	private HttpUriRequest getWordMatch(String word){
 		String url = BASE_URL + "/" + word +  "/json";
-		System.out.println(url);
+		//Log.d("poop",BASE_URL);
 		return new HttpGet(url);
 		
 	}
@@ -68,6 +73,7 @@ public class MainActivity extends Activity {
 			try {
 				HttpResponse response = httpClient.execute(getRequest);
 				if (response != null) {
+					Log.d("poop","i am here");
 					try {
 						Reader reader = new InputStreamReader(response.getEntity().getContent());
 						char buf[] = new char[4096];
@@ -75,6 +81,7 @@ public class MainActivity extends Activity {
 						while (reader.read(buf) > 0) {
 							builder.append(buf);
 						}
+						Log.d("poop",builder.toString());
 						JSONTokener tokener = new JSONTokener(builder.toString());
 						JSONObject json = new JSONObject(tokener);
 						return json;
