@@ -4,6 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,6 +35,7 @@ public class MainActivity extends Activity {
 
 	private String BASE_URL = "http://words.bighugelabs.com/api/2/95723594121b497f2f7f62013fc84eaa";
 	private String newSentence = ""; 
+	private Set<String> articles = new HashSet<String>(Arrays.asList("a","an","the","some"));
 	
 	private final AndroidHttpClient httpClient = AndroidHttpClient
 			.newInstance("joe-android");
@@ -41,7 +46,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		TextView text = (TextView)findViewById(R.id.textView1);
 		text.setText("the");
-		replaceSentence("The girl is cute");
+		replaceSentence("What is your name");
 	}
 
 	@Override
@@ -50,9 +55,49 @@ public class MainActivity extends Activity {
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
+
+	//also note changed xml to allow internet use
+	
+	//Start of code
+	private void replaceSentence(String sentence){
+		String[] words  = sentence.split("\\s+");
+		replaceWords(words, 0);
+	}
 	
 	
+	private void replaceWords(final String[] sentence, final int index){
+		if(index == sentence.length){
+			// AT THIS POINT WE HAVE THE FINAL SENTENCE
+			Log.d("poop",newSentence);
+			return;
+		}
+		
+		final String word = sentence[index];
+		
+		new GetRequest(getWordMatch(word)) {
+			@Override
+			protected void onPostExecute(JSONObject json) {
+				String max = "";
+				if(articles.contains(word.toLowerCase(Locale.ENGLISH))){
+					max = word;
+				}
+				else if(json != null){
+					max = getMaxWord(json);
+				} else{
+					max = word;
+				}
+				newSentence = newSentence + max + " "; 
+				replaceWords(sentence, index + 1);
+			}
+		}.execute();
+	}
 	
+	// String/JSON Helper Functions
+    //-----------------------------------------
+	//-----------------------------------------
+	//-----------------------------------------
+	
+	//Returns largest word in JSONArray
 	private String maxWord(JSONArray array) throws JSONException{
 		String val = null;
 		int maxLength = -1;
@@ -66,12 +111,14 @@ public class MainActivity extends Activity {
 		return val;		
 	}
 	
+	//Returns largest of three words
 	private String maxThree(String one, String two, String three){	
 		if(one.length() >= two.length()){
 			return one.length() >= three.length() ? one : three;
 		}
 		return two.length() >= three.length() ? two : three;
 	}
+	
 	
 	private String getMaxWord(JSONObject json){
 		String noun = "";
@@ -106,38 +153,16 @@ public class MainActivity extends Activity {
 		String max = maxThree(noun,verb,adjective);
 		return max;
 	}
-
-	private void replaceSentence(String sentence){
-		String[] words  = sentence.split("\\s+");
-		replaceWords(words, 0);
-	}
+    //-----------------------------------------
+	//-----------------------------------------
+	//-----------------------------------------
 	
 	
-	private void replaceWords(final String[] sentence, final int index){
-		if(index == sentence.length){
-			//CALL METHOD TO READ THIS SHIT
-			Log.d("poop",newSentence);
-			return;
-		}
-		final String word = sentence[index];
-		new GetRequest(getWordMatch(word)) {
-			@Override
-			protected void onPostExecute(JSONObject json) {
-				String max = "";
-				if(json != null){
-					max = getMaxWord(json);
-				} else{
-					max = word;
-				}
-				newSentence = newSentence + max + " "; 
-				replaceWords(sentence, index + 1);
-			}
-		}.execute();
-	}
+	
+	
 	
 	private HttpUriRequest getWordMatch(String word){
 		String url = BASE_URL + "/" + word +  "/json";
-		Log.d("poop",word);
 		return new HttpGet(url);
 	}
 	
