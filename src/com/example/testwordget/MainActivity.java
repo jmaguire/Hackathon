@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		TextView text = (TextView)findViewById(R.id.textView1);
 		text.setText("the");
-		replaceSentence("The girl is cute");
+		replaceSentence("The quick brown dog jumps over the fence");
 	}
 
 	@Override
@@ -71,15 +71,23 @@ public class MainActivity extends Activity {
 	}
 
 	//also note changed xml to allow internet use
+	//------------------------------------------------------------
+	//----------------PASS THE SENTENCE INTO HERE-----------------
+	//------------------------------------------------------------
 	
-	//Start of code
 	private void replaceSentence(String sentence){
+		sentence = sentence.replaceAll("\\.","");
+		sentence = sentence.replaceAll("\\,","");
+		sentence = sentence.replaceAll("\\?","");
+		sentence = sentence.replaceAll("\\!","");
 		String[] words  = sentence.split("\\s+");
+		for (int i = 0; i < words.length; i++) Log.d("poop", "Here " + words[i]);
 		getPartOfSpeech(sentence);
 	}
 	
 	
-	
+	// Get's part of speech by quering the stanford nlp server
+	// uses a different get request.. get request string
 	private void getPartOfSpeech(final String sentence){
 
 		new GetRequestString(getPOSRequest(URLEncoder.encode(sentence))) {
@@ -88,7 +96,8 @@ public class MainActivity extends Activity {
 				String html = Html.fromHtml(string).toString();
 				
 				String[] words  = sentence.split("\\s+");
-			
+				
+				
 				for (int i = 0; i < words.length; i++){
 					String match = words[i]+"/";
 					int index1 = html.indexOf(match);
@@ -105,11 +114,21 @@ public class MainActivity extends Activity {
 	
 	
 	
+	//------------------------------------------------------------
+	//----------------FINISHES BELOW-----------------
+	//------------------------------------------------------------
 	
 	
 	private void replaceWords(final String[] sentence, final int index){
 		if(index == sentence.length){
-			// AT THIS POINT WE HAVE THE FINAL SENTENCE
+			//------------------------------------------------------------
+			//newSentence is complete here
+			//call a new function and pass newSentence as a parameter.
+			//have it read newSentence
+			//------------------------------------------------------------
+			
+			TextView text = (TextView)findViewById(R.id.textView1);
+			text.setText(newSentence);
 			Log.d("poop",newSentence);
 			return;
 		}
@@ -121,7 +140,6 @@ public class MainActivity extends Activity {
 			protected void onPostExecute(JSONObject json) {
 				String max = "";
 				String pos = partOfSpeech.get(word);
-				
 				if(json == null){
 					max = word;
 				}else if(pos.indexOf("NN") != -1){
@@ -139,9 +157,9 @@ public class MainActivity extends Activity {
 		}.execute();
 	}
 	
-	// String/JSON Helper Functions
+	
     //-----------------------------------------
-	//-----------------------------------------
+	// String/JSON Helper Functions
 	//-----------------------------------------
 	
 	//Returns largest word in JSONArray
@@ -158,13 +176,6 @@ public class MainActivity extends Activity {
 		return val;		
 	}
 	
-	//Returns largest of three words
-	private String maxThree(String one, String two, String three){	
-		if(one.length() >= two.length()){
-			return one.length() >= three.length() ? one : three;
-		}
-		return two.length() >= three.length() ? two : three;
-	}
 	
 	private String getMaxNoun(JSONObject json){
 		String noun = "";
@@ -203,60 +214,10 @@ public class MainActivity extends Activity {
 	}
 	
 	
-	private String getMaxWord(JSONObject json){
-		String noun = "";
-		String verb = "";
-		String adjective = "";
-		
-		int numNouns = 0;
-		int numVerbs = 0;
-		int numAdjectives = 0;
-		
-		//if more nouns assume is nouns
-		if(json.has("noun")){
-			try {
-				JSONArray nouns = json.getJSONObject("noun").getJSONArray("syn");
-				noun = maxWord(nouns);
-				numNouns = nouns.length();
-				//Log.d("poop",noun);
-			} catch (JSONException e) {
-			}
-		}
-		if(json.has("verb")){
-			try {
-				JSONArray verbs = json.getJSONObject("verb").getJSONArray("syn");
-				verb = maxWord(verbs);
-				numVerbs = verbs.length();
-				//Log.d("poop",verb);
-			} catch (JSONException e) {
-			}
-		}
-		if(json.has("adjective")){
-			try {
-				JSONArray adjectives = json.getJSONObject("adjective").getJSONArray("syn");
-				adjective = maxWord(adjectives);
-				numAdjectives = adjectives.length();
-				//Log.d("poop",adjective);
-			} catch (JSONException e) {
-			}
-		}
-		
-		if(numNouns >= numVerbs){
-			return numNouns >= numAdjectives ? noun : adjective;
-		}else{
-			return numVerbs >= numAdjectives ? verb : adjective;
-		}
-		
-		/*
-		String max = maxThree(noun,verb,adjective);
-		return max;
-		*/
-	}
+	
     //-----------------------------------------
+	//HTML GET SHIT
 	//-----------------------------------------
-	//-----------------------------------------
-	
-	
 	private HttpUriRequest getPOSRequest(String sentence){
 		String url = STANFORD_URL + sentence;
 		return new HttpGet(url);
