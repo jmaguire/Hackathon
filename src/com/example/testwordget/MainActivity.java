@@ -75,7 +75,6 @@ public class MainActivity extends Activity {
 	//Start of code
 	private void replaceSentence(String sentence){
 		String[] words  = sentence.split("\\s+");
-		//replaceWords(words, 0);
 		getPartOfSpeech(sentence);
 	}
 	
@@ -95,10 +94,10 @@ public class MainActivity extends Activity {
 					int index1 = html.indexOf(match);
 					int index2 = html.indexOf("\n", index1);
 					String matchPOS = html.substring(index1 + match.length(), index2);
-					partOfSpeech.put(match, matchPOS);
+					partOfSpeech.put(words[i], matchPOS);
 				}
 				
-				
+				replaceWords(words, 0);
 			}
 		}.execute();
 	}
@@ -121,12 +120,17 @@ public class MainActivity extends Activity {
 			@Override
 			protected void onPostExecute(JSONObject json) {
 				String max = "";
-				if(articles.contains(word.toLowerCase(Locale.ENGLISH))){
+				String pos = partOfSpeech.get(word);
+				
+				if(json == null){
 					max = word;
-				}
-				else if(json != null){
-					max = getMaxWord(json);
-				} else{
+				}else if(pos.indexOf("NN") != -1){
+					max = getMaxNoun(json);
+				}else if(pos.indexOf("VB") != -1){
+					max = getMaxVerb(json);
+				}else if(pos.indexOf("JJ") != -1){
+					max = getMaxAdjective(json);
+				}else{
 					max = word;
 				}
 				newSentence = newSentence + max + " "; 
