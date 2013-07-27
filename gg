@@ -1,0 +1,96 @@
+[33mcommit cb65d48dbb49599a0a023c1cb92890f3e7e188b4[m
+Author: Kevin Jonaitis <kevitis117@gmail.com>
+Date:   Fri Jul 26 20:49:29 2013 -0700
+
+    Original commit
+
+[1mdiff --git a/.classpath b/.classpath[m
+[1mnew file mode 100644[m
+[1mindex 0000000..a4763d1[m
+[1m--- /dev/null[m
+[1m+++ b/.classpath[m
+[36m@@ -0,0 +1,8 @@[m
+[32m+[m[32m<?xml version="1.0" encoding="UTF-8"?>[m
+[32m+[m[32m<classpath>[m
+[32m+[m	[32m<classpathentry kind="src" path="src"/>[m
+[32m+[m	[32m<classpathentry kind="src" path="gen"/>[m
+[32m+[m	[32m<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>[m
+[32m+[m	[32m<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>[m
+[32m+[m	[32m<classpathentry kind="output" path="bin/classes"/>[m
+[32m+[m[32m</classpath>[m
+[1mdiff --git a/.project b/.project[m
+[1mnew file mode 100644[m
+[1mindex 0000000..0543684[m
+[1m--- /dev/null[m
+[1m+++ b/.project[m
+[36m@@ -0,0 +1,33 @@[m
+[32m+[m[32m<?xml version="1.0" encoding="UTF-8"?>[m
+[32m+[m[32m<projectDescription>[m
+[32m+[m	[32m<name>Sesquipedalian</name>[m
+[32m+[m	[32m<comment></comment>[m
+[32m+[m	[32m<projects>[m
+[32m+[m	[32m</projects>[m
+[32m+[m	[32m<buildSpec>[m
+[32m+[m		[32m<buildCommand>[m
+[32m+[m			[32m<name>com.android.ide.eclipse.adt.ResourceManagerBuilder</name>[m
+[32m+[m			[32m<arguments>[m
+[32m+[m			[32m</arguments>[m
+[32m+[m		[32m</buildCommand>[m
+[32m+[m		[32m<buildCommand>[m
+[32m+[m			[32m<name>com.android.ide.eclipse.adt.PreCompilerBuilder</name>[m
+[32m+[m			[32m<arguments>[m
+[32m+[m			[32m</arguments>[m
+[32m+[m		[32m</buildCommand>[m
+[32m+[m		[32m<buildCommand>[m
+[32m+[m			[32m<name>org.eclipse.jdt.core.javabuilder</name>[m
+[32m+[m			[32m<arguments>[m
+[32m+[m			[32m</arguments>[m
+[32m+[m		[32m</buildCommand>[m
+[32m+[m		[32m<buildCommand>[m
+[32m+[m			[32m<name>com.android.ide.eclipse.adt.ApkBuilder</name>[m
+[32m+[m			[32m<arguments>[m
+[32m+[m			[32m</arguments>[m
+[32m+[m		[32m</buildCommand>[m
+[32m+[m	[32m</buildSpec>[m
+[32m+[m	[32m<natures>[m
+[32m+[m		[32m<nature>com.android.ide.eclipse.adt.AndroidNature</nature>[m
+[32m+[m		[32m<nature>org.eclipse.jdt.core.javanature</nature>[m
+[32m+[m	[32m</natures>[m
+[32m+[m[32m</projectDescription>[m
+[1mdiff --git a/.settings/org.eclipse.jdt.core.prefs b/.settings/org.eclipse.jdt.core.prefs[m
+[1mnew file mode 100644[m
+[1mindex 0000000..b080d2d[m
+[1m--- /dev/null[m
+[1m+++ b/.settings/org.eclipse.jdt.core.prefs[m
+[36m@@ -0,0 +1,4 @@[m
+[32m+[m[32meclipse.preferences.version=1[m
+[32m+[m[32morg.eclipse.jdt.core.compiler.codegen.targetPlatform=1.6[m
+[32m+[m[32morg.eclipse.jdt.core.compiler.compliance=1.6[m
+[32m+[m[32morg.eclipse.jdt.core.compiler.source=1.6[m
+[1mdiff --git a/AndroidManifest.xml b/AndroidManifest.xml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..2c2a6d7[m
+[1m--- /dev/null[m
+[1m+++ b/AndroidManifest.xml[m
+[36m@@ -0,0 +1,27 @@[m
+[32m+[m[32m<?xml version="1.0" encoding="utf-8"?>[m
+[32m+[m[32m<manifest xmlns:android="http://schemas.android.com/apk/res/android"[m
+[32m+[m[32m    package="com.example.sesquipedalian"[m
+[32m+[m[32m    android:versionCode="1"[m
+[32m+[m[32m    android:versionName="1.0" >[m
+[32m+[m
+[32m+[m[32m    <uses-sdk[m
+[32m+[m[32m        android:minSdkVersion="7"[m
+[32m+[m[32m        android:targetSdkVersion="9" />[m
+[32m+[m
+[32m+[m[32m    <application[m
+[32m+[m[32m        android:allowBackup="true"[m
+[32m+[m[32m        android:icon="@drawable/ic_launcher"[m
+[32m+[m[32m        android:label="@string/app_name"[m
+[32m+[m[32m        android:theme="@style/AppTheme" >[m
+[32m+[m[32m        <activity[m
+[32m+[m[32m            android:name="com.example.sesquipedalian.MainActivity"[m
+[32m+[m[32m            android:label="@string/app_name" >[m
+[32m+[m[32m            <intent-filter>[m
+[32m+[m[32m                <action android:name="android.intent.action.MAIN" />[m
+[32m
