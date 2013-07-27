@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		TextView text = (TextView)findViewById(R.id.textView1);
 		text.setText("the");
-		replaceSentence("The quick brown dog jumps over the fence");
+		replaceSentence("Hello children");
 	}
 
 	@Override
@@ -81,7 +81,7 @@ public class MainActivity extends Activity {
 		sentence = sentence.replaceAll("\\?","");
 		sentence = sentence.replaceAll("\\!","");
 		String[] words  = sentence.split("\\s+");
-		for (int i = 0; i < words.length; i++) Log.d("poop", "Here " + words[i]);
+		for( int i = 0; i < words.length; i++ ) Log.d("poop",words[i]);
 		getPartOfSpeech(sentence);
 	}
 	
@@ -140,17 +140,26 @@ public class MainActivity extends Activity {
 			protected void onPostExecute(JSONObject json) {
 				String max = "";
 				String pos = partOfSpeech.get(word);
+				
+				Log.d("poop",word + " " + pos);
 				if(json == null){
 					max = word;
 				}else if(pos.indexOf("NN") != -1){
 					max = getMaxNoun(json);
-				}else if(pos.indexOf("VB") != -1){
+				}
+				else if(pos.indexOf("VB") != -1){
 					max = getMaxVerb(json);
-				}else if(pos.indexOf("JJ") != -1){
+				}
+				else if(pos.indexOf("JJ") != -1){
 					max = getMaxAdjective(json);
 				}else{
 					max = word;
 				}
+				
+				if(max.length() == 0){
+					max = word;
+				}
+				
 				newSentence = newSentence + max + " "; 
 				replaceWords(sentence, index + 1);
 			}
