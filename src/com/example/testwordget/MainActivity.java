@@ -4,9 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.net.URLEncoder;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,11 +25,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
+import org.jsoup.Jsoup;
+import org.jsoup.select.Elements;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import java.net.URL;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.app.Activity;
+import android.text.Html;
 import android.util.Log;
 import android.view.Menu;
 import android.widget.TextView;
@@ -34,8 +45,11 @@ import android.widget.TextView;
 public class MainActivity extends Activity {
 
 	private String BASE_URL = "http://words.bighugelabs.com/api/2/95723594121b497f2f7f62013fc84eaa";
+	private String STANFORD_URL = "http://nlp.stanford.edu:8080/parser/index.jsp?query=";
 	private String newSentence = ""; 
+	
 	private Set<String> articles = new HashSet<String>(Arrays.asList("a","an","the","some"));
+	private Map<String,String> partOfSpeech = new HashMap<String,String>();
 	
 	private final AndroidHttpClient httpClient = AndroidHttpClient
 			.newInstance("joe-android");
@@ -46,7 +60,7 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		TextView text = (TextView)findViewById(R.id.textView1);
 		text.setText("the");
-		replaceSentence("What is your name");
+		replaceSentence("The girl is cute");
 	}
 
 	@Override
@@ -61,8 +75,37 @@ public class MainActivity extends Activity {
 	//Start of code
 	private void replaceSentence(String sentence){
 		String[] words  = sentence.split("\\s+");
-		replaceWords(words, 0);
+		//replaceWords(words, 0);
+		getPartOfSpeech(sentence);
 	}
+	
+	
+	
+	private void getPartOfSpeech(final String sentence){
+
+		new GetRequestString(getPOSRequest(URLEncoder.encode(sentence))) {
+			@Override
+			protected void onPostExecute(String string) {
+				String html = Html.fromHtml(string).toString();
+				
+				String[] words  = sentence.split("\\s+");
+			
+				for (int i = 0; i < words.length; i++){
+					String match = words[i]+"/";
+					int index1 = html.indexOf(match);
+					int index2 = html.indexOf("\n", index1);
+					String matchPOS = html.substring(index1 + match.length(), index2);
+					partOfSpeech.put(match, matchPOS);
+				}
+				
+				
+			}
+		}.execute();
+	}
+	
+	
+	
+	
 	
 	
 	private void replaceWords(final String[] sentence, final int index){
@@ -119,17 +162,58 @@ public class MainActivity extends Activity {
 		return two.length() >= three.length() ? two : three;
 	}
 	
+	private String getMaxNoun(JSONObject json){
+		String noun = "";
+		if(json.has("noun")){
+			try {
+				JSONArray nouns = json.getJSONObject("noun").getJSONArray("syn");
+				noun = maxWord(nouns);
+			} catch (JSONException e) {
+			}
+		}
+		return noun;
+	}
+	
+	private String getMaxVerb(JSONObject json){
+		String verb = "";
+		if(json.has("verb")){
+			try {
+				JSONArray verbs = json.getJSONObject("verb").getJSONArray("syn");
+				verb = maxWord(verbs);
+			} catch (JSONException e) {
+			}
+		}
+		return verb;
+	}
+	
+	private String getMaxAdjective(JSONObject json){
+		String adjective = "";
+		if(json.has("adjective")){
+			try {
+				JSONArray adjectives = json.getJSONObject("adjective").getJSONArray("syn");
+				adjective = maxWord(adjectives);
+			} catch (JSONException e) {
+			}
+		}
+		return adjective;
+	}
+	
 	
 	private String getMaxWord(JSONObject json){
 		String noun = "";
 		String verb = "";
 		String adjective = "";
 		
+		int numNouns = 0;
+		int numVerbs = 0;
+		int numAdjectives = 0;
+		
 		//if more nouns assume is nouns
 		if(json.has("noun")){
 			try {
 				JSONArray nouns = json.getJSONObject("noun").getJSONArray("syn");
 				noun = maxWord(nouns);
+				numNouns = nouns.length();
 				//Log.d("poop",noun);
 			} catch (JSONException e) {
 			}
@@ -138,6 +222,7 @@ public class MainActivity extends Activity {
 			try {
 				JSONArray verbs = json.getJSONObject("verb").getJSONArray("syn");
 				verb = maxWord(verbs);
+				numVerbs = verbs.length();
 				//Log.d("poop",verb);
 			} catch (JSONException e) {
 			}
@@ -146,19 +231,32 @@ public class MainActivity extends Activity {
 			try {
 				JSONArray adjectives = json.getJSONObject("adjective").getJSONArray("syn");
 				adjective = maxWord(adjectives);
+				numAdjectives = adjectives.length();
 				//Log.d("poop",adjective);
 			} catch (JSONException e) {
 			}
 		}
+		
+		if(numNouns >= numVerbs){
+			return numNouns >= numAdjectives ? noun : adjective;
+		}else{
+			return numVerbs >= numAdjectives ? verb : adjective;
+		}
+		
+		/*
 		String max = maxThree(noun,verb,adjective);
 		return max;
+		*/
 	}
     //-----------------------------------------
 	//-----------------------------------------
 	//-----------------------------------------
 	
 	
-	
+	private HttpUriRequest getPOSRequest(String sentence){
+		String url = STANFORD_URL + sentence;
+		return new HttpGet(url);
+	}
 	
 	
 	private HttpUriRequest getWordMatch(String word){
@@ -184,6 +282,40 @@ public class MainActivity extends Activity {
 						JSONTokener tokener = new JSONTokener(builder.toString());
 						JSONObject json = new JSONObject(tokener);
 						return json;
+					} catch (Exception e) {
+						return null;
+					}
+				} else {
+					return null;
+				}
+			} catch (IOException e) {
+				return null;
+			}
+		}
+		
+	}
+    
+    private class GetRequestString extends AsyncTask<Void, Void, String> {
+		private HttpUriRequest getRequest;
+		
+		public GetRequestString(HttpUriRequest req) {
+			this.getRequest = req;
+		}
+		
+		@Override
+		protected String doInBackground(Void... requests) {
+			try {
+				HttpResponse response = httpClient.execute(getRequest);
+				if (response != null) {
+					try {
+						Reader reader = new InputStreamReader(response.getEntity().getContent());
+						
+						char buf[] = new char[16000];
+						StringBuilder builder = new StringBuilder();
+						while (reader.read(buf) > 0) {
+							builder.append(buf);
+						}
+						return builder.toString();
 					} catch (Exception e) {
 						return null;
 					}
